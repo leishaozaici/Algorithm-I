@@ -10,27 +10,30 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class Deque<Item> implements Iterable<Item> {
-    private Item[] a;
-    private int head;
-    private int tail;
-    private int N;
+    private Node first;
+    private Node last;
+    private int n;
+
+    private class Node {
+        private Item item;
+        private Node pre, next;
+    }
 
     // construct an empty deque
     public Deque() {
-        N = 0;
-        head = 0;
-        tail = 0;
-        a = (Item[]) new Object[1];
+        n = 0;
+        first = null;
+        last = null;
     }
 
     // is the deque empty?
     public boolean isEmpty() {
-        return N == 0;
+        return n == 0;
     }
 
     // return the number of items on the deque
     public int size() {
-        return N;
+        return n;
     }
 
     // add the item to the front
@@ -38,11 +41,18 @@ public class Deque<Item> implements Iterable<Item> {
         if (item == null) {
             throw new IllegalArgumentException();
         }
-        if (N == a.length) {
-            resize(a.length * 2);
+        Node oldfirst = first;
+        first = new Node();
+        first.item = item;
+        first.pre = null;
+        if (n != 0) {
+            first.next = oldfirst;
+            oldfirst.pre = first;
         }
-        a[head--] = item;
-        N++;
+        else {
+            last = first;
+        }
+        n++;
     }
 
     // add the item to the back
@@ -50,11 +60,17 @@ public class Deque<Item> implements Iterable<Item> {
         if (item == null) {
             throw new IllegalArgumentException();
         }
-        if (N == a.length) {
-            resize(a.length * 2);
+        Node oldlast = last;
+        last = new Node();
+        last.item = item;
+        last.pre = oldlast;
+        if (n != 0) {
+            oldlast.next = last;
         }
-        a[tail++] = item;
-        N++;
+        else {
+            first = last;
+        }
+        n++;
     }
 
     // remove and return the item from the front
@@ -62,10 +78,14 @@ public class Deque<Item> implements Iterable<Item> {
         if (isEmpty()) {
             throw new NoSuchElementException();
         }
-        Item item = a[head];
-        a[head++] = null;
-        if (N > 0 && N == a.length / 4) {
-            resize(a.length / 2);
+        Item item = first.item;
+        first = first.next;
+        n--;
+        if (n == 0) {
+            last = null;
+        }
+        else {
+            first.pre = null;
         }
         return item;
     }
@@ -75,10 +95,14 @@ public class Deque<Item> implements Iterable<Item> {
         if (isEmpty()) {
             throw new NoSuchElementException();
         }
-        Item item = a[tail];
-        a[tail--] = null;
-        if (N > 0 && N == a.length / 4) {
-            resize(a.length / 2);
+        Item item = last.item;
+        last = last.pre;
+        n--;
+        if (n == 0) {
+            first = null;
+        }
+        else {
+            last.next = null;
         }
         return item;
     }
@@ -89,26 +113,21 @@ public class Deque<Item> implements Iterable<Item> {
     }
 
     private class DequeIterator implements Iterator<Item> {
-        private int i = N;
+        private Node current = first;
 
         public boolean hasNext() {
-            return i > 0;
+            return current != null;
         }
 
         public Item next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            return a[--i];
-        }
-    }
+            Item item = current.item;
+            current = current.next;
+            return item;
 
-    private void resize(int max) {
-        Item[] temp = (Item[]) new Object[max];
-        for (int i = 0; i < N; i++) {
-            temp[i] = a[i];
         }
-        a = temp;
     }
 
     // unit testing (required)
