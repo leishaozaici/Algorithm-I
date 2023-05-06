@@ -1,5 +1,7 @@
 *.txt
-.idea
-.lift
+.idea/
+.lift/
 *.class
 *.zip
+*.iml
+*.png
