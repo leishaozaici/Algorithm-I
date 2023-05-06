@@ -1,0 +1,5 @@
+*.txt
+.idea
+.lift
+*.class
+*.zip
